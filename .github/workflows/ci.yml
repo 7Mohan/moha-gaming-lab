@@ -1,0 +1,56 @@
+name: Moha Gaming Lab — CI Pipeline
+
+on:
+  push:
+    branches: [main, master, staging, develop]
+  pull_request:
+    branches: [main, master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Lint, Test & Build Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Check TypeScript Types
+        run: npx tsc --noEmit
+
+      - name: Run Production Test Suites
+        run: node --test tests/*.test.mjs
+        env:
+          NODE_ENV: test
+
+      - name: Build Next.js Production Bundle
+        run: npm run build
+        env:
+          NODE_ENV: production
+          NEXT_TELEMETRY_DISABLED: 1
+          NEXT_PUBLIC_SITE_URL: https://mohagaminglab.com
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+          NEXT_PUBLIC_DOWNLOADS_ENABLED: "true"
+          NEXT_PUBLIC_ADS_ENABLED: "true"
+          NEXT_PUBLIC_ANALYTICS_ENABLED: "true"

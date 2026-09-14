@@ -1,0 +1,76 @@
+name: Moha Gaming Lab — Production Deployment
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      deployment_environment:
+        description: "Target deployment environment"
+        required: true
+        default: "production"
+        type: choice
+        options:
+          - production
+          - staging
+
+concurrency:
+  group: production-deployment
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Production Release & Smoke Verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Run Database Migrations (Direct URL)
+        if: env.DIRECT_URL != ''
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.DIRECT_URL || secrets.DATABASE_URL }}
+
+      - name: Build Standalone Bundle
+        run: npm run build
+        env:
+          NODE_ENV: production
+          NEXT_TELEMETRY_DISABLED: 1
+          BUILD_STANDALONE: "true"
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL || 'https://mohagaminglab.com' }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_DOWNLOADS_ENABLED: ${{ secrets.NEXT_PUBLIC_DOWNLOADS_ENABLED || 'true' }}
+          NEXT_PUBLIC_ADS_ENABLED: ${{ secrets.NEXT_PUBLIC_ADS_ENABLED || 'true' }}
+          NEXT_PUBLIC_ANALYTICS_ENABLED: ${{ secrets.NEXT_PUBLIC_ANALYTICS_ENABLED || 'true' }}
+
+      - name: Deploy to Vercel (Production)
+        if: env.VERCEL_TOKEN != ''
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: "--prod"
+
+      - name: Post-Deployment Smoke Verification
+        run: |
+          echo "Running post-deployment smoke verification..."
+          node --test tests/production-smoke.test.mjs
+        env:
+          NODE_ENV: test

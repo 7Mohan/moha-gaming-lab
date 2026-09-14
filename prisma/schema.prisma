@@ -1,0 +1,706 @@
+// prisma/schema.prisma
+// ────────────────────────────────────────────────────────────────
+// Moha Gaming Lab — Production PostgreSQL Database Schema
+// Normalized architecture for Games, Apps, Releases, Tools, Guides,
+// Categories, Tags, Cross-Content Relations, and SEO Metadata.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ── Enums ─────────────────────────────────────────────────────────
+
+enum ContentStatus {
+  DRAFT
+  REVIEW
+  PUBLISHED
+  ARCHIVED
+}
+
+enum VerificationStatus {
+  VERIFIED
+  UNVERIFIED
+  PENDING
+  FAILED
+  UNAVAILABLE
+}
+
+enum DownloadSourceType {
+  HOSTED
+  OFFICIAL_DEVELOPER
+  GITHUB_RELEASE
+  DIRECT_HOSTED
+  FDROID
+  TRUSTED_EXTERNAL
+  UNVERIFIED
+  UNAVAILABLE
+}
+
+enum PlatformType {
+  ANDROID
+  IOS
+  CROSS_PLATFORM
+}
+
+enum DifficultyLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum SectionType {
+  GAME
+  APP
+  TOOL
+  GUIDE
+}
+
+// ── Category & Tag Taxonomy ──────────────────────────────────────
+
+model Category {
+  id          String      @id @default(cuid())
+  slug        String      @unique
+  name        String
+  description String?
+  sectionType SectionType
+  createdAt   DateTime    @default(now())
+
+  // Relations
+  games       Game[]
+  apps        App[]
+  tools       Tool[]
+  guides      Guide[]
+
+  @@index([sectionType])
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  name      String
+  createdAt DateTime @default(now())
+
+  // Relations
+  games     GameTag[]
+  apps      AppTag[]
+  tools     ToolTag[]
+  guides    GuideTag[]
+
+  @@index([slug])
+}
+
+// ── Games ────────────────────────────────────────────────────────
+
+model Game {
+  id                String        @id @default(cuid())
+  slug              String        @unique
+  name              String
+  altNames          String[]      @default([])
+  excerpt           String
+  description       String?       @db.Text
+  icon              String?
+  coverImage        String?
+  platform          PlatformType  @default(ANDROID)
+  categoryId        String?
+  category          Category?     @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  genres            String[]      @default([])
+  performanceAreas  String[]      @default([])
+  deviceTier        String        @default("mid-range")
+  fpsCap            Int?
+  touchSamplingRate Int?
+  thermalProfile    String?
+  status            ContentStatus @default(PUBLISHED)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  publishedAt       DateTime?
+
+  // Structured JSON configurations
+  recommendations   Json?         // Array of OptimizationRecommendation
+  commonProblems    Json?         // Array of CommonProblem
+
+  // Taxonomy & Relations
+  tags              GameTag[]
+  relatedTools      GameRelatedTool[]
+  relatedApps       GameRelatedApp[]
+  relatedGuides     GameRelatedGuide[]
+
+  @@index([slug])
+  @@index([status])
+  @@index([categoryId])
+  @@index([publishedAt])
+}
+
+// ── Apps & Releases ──────────────────────────────────────────────
+
+model App {
+  id                 String             @id @default(cuid())
+  slug               String             @unique
+  name               String
+  packageName        String?
+  excerpt            String
+  description        String             @db.Text
+  icon               String?
+  developer          String
+  website            String?
+  license            String?            @default("Freeware")
+  categoryId         String?
+  category           Category?          @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  status             ContentStatus      @default(PUBLISHED)
+  verificationStatus VerificationStatus @default(VERIFIED)
+  requiresRoot       Boolean            @default(false)
+  targetSdkVersion   Int?
+  features           String[]           @default([])
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  publishedAt        DateTime?
+
+  // Structured configurations
+  permissions        Json?              // Array of AppPermission
+  installGuide       Json?              // AppInstallGuide object
+
+  // Versioned Releases (1-to-many)
+  releases           AppRelease[]
+
+  // Taxonomy & Relations
+  tags               AppTag[]
+  relatedGames       AppRelatedGame[]
+  relatedTools       AppRelatedTool[]
+  relatedGuides      AppRelatedGuide[]
+
+  @@index([slug])
+  @@index([packageName])
+  @@index([status])
+  @@index([verificationStatus])
+  @@index([categoryId])
+}
+
+model AppRelease {
+  id                   String             @id @default(cuid())
+  appId                String
+  app                  App                @relation(fields: [appId], references: [id], onDelete: Cascade)
+  version              String
+  versionCode          Int?
+  releaseDate          DateTime
+  androidMinVersion    String             @default("8.0")
+  targetSdkVersion     Int?
+  architectures        String[]           @default(["arm64-v8a", "universal"])
+  fileSize             BigInt?
+  downloadUrl          String?
+  sourceUrl            String?
+  sourceName           String
+  sourceType           DownloadSourceType @default(GITHUB_RELEASE)
+  checksumSha256       String?
+  checksumMd5          String?
+  checksumAlgorithm    String?            @default("sha256")
+  verificationStatus   VerificationStatus @default(PENDING)
+  verificationEvidence String?            @db.Text
+  storagePath          String?
+  fileName             String?
+  mimeType             String?            @default("application/vnd.android.package-archive")
+  fileSizeBytes        BigInt?
+  status               ContentStatus      @default(PUBLISHED)
+  createdBy            String?
+  updatedBy            String?
+  changelog            String[]           @default([])
+  isLatest             Boolean            @default(false)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  // Structured Download Sources
+  downloadSources      DownloadSource[]
+
+  @@index([appId])
+  @@index([version])
+  @@index([versionCode])
+  @@index([isLatest])
+  @@index([status])
+  @@index([verificationStatus])
+  @@index([checksumSha256])
+}
+
+model DownloadEvent {
+  id         String   @id @default(cuid())
+  releaseId  String
+  sourceType String   @default("HOSTED")
+  createdAt  DateTime @default(now())
+
+  @@index([releaseId])
+  @@index([createdAt])
+}
+
+model DownloadSource {
+  id                 String             @id @default(cuid())
+  releaseId          String
+  release            AppRelease         @relation(fields: [releaseId], references: [id], onDelete: Cascade)
+  name               String
+  url                String
+  sourceType         DownloadSourceType @default(GITHUB_RELEASE)
+  isOfficial         Boolean            @default(true)
+  isDirect           Boolean            @default(false)
+  verificationStatus VerificationStatus @default(VERIFIED)
+  fileSize           BigInt?
+  checksum           String?
+  checksumAlgorithm  String?            @default("sha256")
+  createdAt          DateTime           @default(now())
+
+  @@index([releaseId])
+}
+
+// ── Tools ────────────────────────────────────────────────────────
+
+model Tool {
+  id                   String          @id @default(cuid())
+  slug                 String          @unique
+  name                 String
+  shortDescription     String
+  description          String          @db.Text
+  categoryId           String?
+  category             Category?       @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  platforms            String[]        @default(["web"])
+  status               ContentStatus   @default(PUBLISHED)
+  whatItDoes           String          @db.Text
+  whatItMeasures       String[]        @default([])
+  capabilities         String[]        @default([])
+  limitations          String[]        @default([])
+  technicalExplanation String          @db.Text
+  howToInterpret       String[]        @default([])
+  featured             Boolean         @default(false)
+  difficulty           DifficultyLevel @default(BEGINNER)
+  browserRequirements  String?
+  requiresWebGl        Boolean         @default(false)
+  requiresRoot         Boolean         @default(false)
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+  publishedAt          DateTime?
+
+  // Taxonomy & Relations
+  tags                 ToolTag[]
+  relatedGames         ToolRelatedGame[]
+  relatedApps          ToolRelatedApp[]
+  relatedGuides        ToolRelatedGuide[]
+
+  @@index([slug])
+  @@index([status])
+  @@index([categoryId])
+}
+
+// ── Guides ───────────────────────────────────────────────────────
+
+model Guide {
+  id                 String          @id @default(cuid())
+  slug               String          @unique
+  title              String
+  excerpt            String
+  description        String          @db.Text
+  categoryId         String?
+  category           Category?       @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  contentType        String          @default("Guide")
+  difficulty         DifficultyLevel @default(BEGINNER)
+  readingTimeMinutes Int             @default(5)
+  authorName         String          @default("Moha Gaming Lab")
+  authorRole         String?         @default("Performance Engineering Team")
+  sections           Json            // Array of GuideSection
+  faqs               Json?           // Array of GuideFaq
+  status             ContentStatus   @default(PUBLISHED)
+  revision           Int             @default(1)
+  publishedAt        DateTime        @default(now())
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  // Taxonomy & Relations
+  tags               GuideTag[]
+  relatedGames       GuideRelatedGame[]
+  relatedTools       GuideRelatedTool[]
+  relatedApps        GuideRelatedApp[]
+
+  @@index([slug])
+  @@index([status])
+  @@index([categoryId])
+  @@index([publishedAt])
+}
+
+// ── SEO Metadata ─────────────────────────────────────────────────
+
+model SeoMetadata {
+  id             String      @id @default(cuid())
+  entityType     SectionType
+  entityId       String
+  metaTitle      String
+  metaDescription String
+  canonicalUrl   String?
+  ogTitle        String?
+  ogDescription  String?
+  ogImage        String?
+  noIndex        Boolean     @default(false)
+  structuredData Json?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  @@unique([entityType, entityId])
+  @@index([entityType, entityId])
+}
+
+// ── Junction Tables for Many-to-Many Tags ─────────────────────────
+
+model GameTag {
+  gameId String
+  tagId  String
+  game   Game   @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([gameId, tagId])
+}
+
+model AppTag {
+  appId String
+  tagId String
+  app   App    @relation(fields: [appId], references: [id], onDelete: Cascade)
+  tag   Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([appId, tagId])
+}
+
+model ToolTag {
+  toolId String
+  tagId  String
+  tool   Tool   @relation(fields: [toolId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([toolId, tagId])
+}
+
+model GuideTag {
+  guideId String
+  tagId   String
+  guide   Guide  @relation(fields: [guideId], references: [id], onDelete: Cascade)
+  tag     Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([guideId, tagId])
+}
+
+// ── Cross-Content Relations ──────────────────────────────────────
+
+model GameRelatedTool {
+  gameId String
+  toolId String
+  game   Game   @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@id([gameId, toolId])
+}
+
+model GameRelatedApp {
+  gameId String
+  appId  String
+  game   Game   @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@id([gameId, appId])
+}
+
+model GameRelatedGuide {
+  gameId  String
+  guideId String
+  game    Game   @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@id([gameId, guideId])
+}
+
+model ToolRelatedGame {
+  toolId String
+  gameId String
+  tool   Tool   @relation(fields: [toolId], references: [id], onDelete: Cascade)
+
+  @@id([toolId, gameId])
+}
+
+model ToolRelatedApp {
+  toolId String
+  appId  String
+  tool   Tool   @relation(fields: [toolId], references: [id], onDelete: Cascade)
+
+  @@id([toolId, appId])
+}
+
+model ToolRelatedGuide {
+  toolId  String
+  guideId String
+  tool    Tool   @relation(fields: [toolId], references: [id], onDelete: Cascade)
+
+  @@id([toolId, guideId])
+}
+
+model AppRelatedGame {
+  appId  String
+  gameId String
+  app    App    @relation(fields: [appId], references: [id], onDelete: Cascade)
+
+  @@id([appId, gameId])
+}
+
+model AppRelatedTool {
+  appId  String
+  toolId String
+  app    App    @relation(fields: [appId], references: [id], onDelete: Cascade)
+
+  @@id([appId, toolId])
+}
+
+model AppRelatedGuide {
+  appId   String
+  guideId String
+  app     App    @relation(fields: [appId], references: [id], onDelete: Cascade)
+
+  @@id([appId, guideId])
+}
+
+model GuideRelatedGame {
+  guideId String
+  gameId  String
+  guide   Guide  @relation(fields: [guideId], references: [id], onDelete: Cascade)
+
+  @@id([guideId, gameId])
+}
+
+model GuideRelatedTool {
+  guideId String
+  toolId  String
+  guide   Guide  @relation(fields: [guideId], references: [id], onDelete: Cascade)
+
+  @@id([guideId, toolId])
+}
+
+model GuideRelatedApp {
+  guideId String
+  appId   String
+  guide   Guide  @relation(fields: [guideId], references: [id], onDelete: Cascade)
+
+  @@id([guideId, appId])
+}
+
+// ── Admin Users ───────────────────────────────────────────────
+
+enum AdminRole {
+  ADMIN
+  EDITOR
+  AUTHOR
+}
+
+model AdminUser {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  name          String
+  role          AdminRole @default(AUTHOR)
+  isActive      Boolean   @default(true)
+  lastLoginAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Audit trail
+  auditLogs     AuditLog[]
+
+  @@index([email])
+  @@index([role])
+}
+
+// ── Audit Log ────────────────────────────────────────────────
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  PUBLISH
+  ARCHIVE
+  DELETE
+  VERIFY
+  LOGIN
+  LOGOUT
+  SUBMIT_REVIEW
+}
+
+model AuditLog {
+  id         String      @id @default(cuid())
+  userId     String?
+  user       AdminUser?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action     AuditAction
+  entityType String      // "Game" | "App" | "Tool" | "Guide" | "Category" | "Tag" | "Release"
+  entityId   String?
+  entitySlug String?
+  metadata   Json?       // Additional context (old values, new values, etc.)
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime    @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+// ── Phase 13: Monetization & Advertising ──────────────────────
+
+enum AdPageType {
+  HOME
+  GAME
+  APP
+  TOOL
+  GUIDE
+  DOWNLOAD
+}
+
+enum AdFormat {
+  BANNER_HORIZONTAL
+  RECTANGLE_MEDIUM
+  RESPONSIVE
+  SPONSORED_CARD
+}
+
+enum AdProviderType {
+  ADSENSE
+  DIRECT_SPONSOR
+  AFFILIATE
+  TEST_PLACEHOLDER
+}
+
+enum AdDeviceTarget {
+  ALL
+  MOBILE
+  DESKTOP
+}
+
+enum MonetizationEventType {
+  AD_IMPRESSION
+  AD_CLICK
+  AFFILIATE_CLICK
+  SPONSORED_VIEW
+}
+
+model AdPlacement {
+  id          String         @id @default(cuid())
+  key         String         @unique // e.g. "homepage_after_hero", "app_after_overview"
+  name        String
+  description String?
+  pageType    AdPageType     @default(HOME)
+  location    String         // "after_hero", "mid_content", "after_result", "bottom"
+  format      AdFormat       @default(RESPONSIVE)
+  enabled     Boolean        @default(true)
+  provider    AdProviderType @default(TEST_PLACEHOLDER)
+  slotId      String?
+  priority    Int            @default(0)
+  device      AdDeviceTarget @default(ALL)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([pageType])
+  @@index([enabled])
+}
+
+model AffiliateLink {
+  id                 String    @id @default(cuid())
+  slug               String    @unique // Identifier used in /api/go/[slug]
+  name               String
+  destinationUrl     String    // Strictly validated HTTPS target
+  provider           String?   // e.g. "Amazon", "DirectPartner"
+  campaign           String?
+  enabled            Boolean   @default(true)
+  clickCount         Int       @default(0)
+  disclosureRequired Boolean   @default(true)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([slug])
+  @@index([enabled])
+}
+
+model SponsoredContent {
+  id            String        @id @default(cuid())
+  sponsorName   String
+  sponsorUrl    String
+  sponsorLogo   String?
+  title         String
+  message       String        @db.Text
+  targetSection SectionType?
+  status        ContentStatus @default(DRAFT)
+  startDate     DateTime?
+  endDate       DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([status])
+  @@index([targetSection])
+}
+
+model MonetizationEvent {
+  id            String                @id @default(cuid())
+  eventType     MonetizationEventType
+  placementKey  String?
+  affiliateSlug String?
+  createdAt     DateTime              @default(now())
+
+  @@index([eventType])
+  @@index([createdAt])
+}
+
+// ── Phase 14: Analytics, SEO & Growth ─────────────────────────
+
+model AnalyticsEvent {
+  id                 String   @id @default(cuid())
+  eventName          String   // e.g. "PAGE_VIEW", "TOOL_COMPLETE", "DOWNLOAD_START", "SEARCH_SUBMIT"
+  category           String   // "navigation", "games", "tools", "apps", "guides", "downloads", "search", "web_vitals"
+  path               String?
+  contentType        String?  // "game", "app", "tool", "guide"
+  contentSlug        String?
+  anonymousSessionId String?
+  metadata           Json?    // Safe sanitized payload
+  createdAt          DateTime @default(now())
+
+  @@index([eventName])
+  @@index([category])
+  @@index([path])
+  @@index([createdAt])
+  @@index([contentSlug])
+}
+
+model Redirect {
+  id          String    @id @default(cuid())
+  sourcePath  String    @unique // e.g. "/games/old-pubg-guide"
+  targetPath  String    // e.g. "/guides/pubg-mobile-fps"
+  statusCode  Int       @default(301)
+  enabled     Boolean   @default(true)
+  hitCount    Int       @default(0)
+  lastHitAt   DateTime?
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([sourcePath])
+  @@index([enabled])
+}
+
+model Campaign {
+  id          String   @id @default(cuid())
+  slug        String   @unique // Identifier
+  name        String
+  source      String   // utm_source (e.g. "tiktok", "youtube", "twitter")
+  medium      String?  // utm_medium (e.g. "social", "cpc", "affiliate")
+  campaign    String?  // utm_campaign
+  targetUrl   String   // Destination
+  clickCount  Int      @default(0)
+  enabled     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([slug])
+  @@index([source])
+}
+
+
+

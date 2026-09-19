@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="100%" height="100%">
+  <defs>
+    <linearGradient id="ff-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2D1107"/>
+      <stop offset="50%" stop-color="#1A0702"/>
+      <stop offset="100%" stop-color="#080200"/>
+    </linearGradient>
+    <linearGradient id="ff-flame" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFDD00"/>
+      <stop offset="40%" stop-color="#FF5500"/>
+      <stop offset="100%" stop-color="#D90429"/>
+    </linearGradient>
+  </defs>
+  <!-- Background Container -->
+  <rect width="128" height="128" rx="28" fill="url(#ff-bg)"/>
+  <rect width="126" height="126" x="1" y="1" rx="27" fill="none" stroke="#FF5500" stroke-width="2" stroke-opacity="0.4"/>
+
+  <!-- Iconic Flaming Knife / Wing Emblem -->
+  <g transform="translate(24, 14)">
+    <!-- Outer Wing Flame (Red) -->
+    <path d="M40 74 C20 62 14 36 26 12 C28 26 36 34 38 42 C40 32 46 22 56 16 C54 28 58 40 68 46 C60 52 56 60 54 70 C48 76 44 76 40 74 Z" fill="url(#ff-flame)"/>
+    <!-- Inner Flame Core (Yellow) -->
+    <path d="M40 70 C30 62 26 44 34 26 C36 36 40 42 42 48 C44 40 48 32 54 28 C52 36 54 44 60 48 C54 52 50 58 48 66 C44 70 42 70 40 70 Z" fill="#FFE600"/>
+    <!-- Combat Knife Slash -->
+    <path d="M22 64 L58 20 L54 18 L18 62 Z" fill="#FFFFFF" opacity="0.8"/>
+  </g>
+
+  <!-- Free Fire Wordmark -->
+  <g transform="translate(16, 94)">
+    <rect x="0" y="0" width="96" height="22" rx="6" fill="#FF5500"/>
+    <text x="48" y="15" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Impact, Roboto, sans-serif" font-weight="900" font-size="12" fill="#FFFFFF" text-anchor="middle" letter-spacing="1.2">FREE FIRE</text>
+  </g>
+</svg>

@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="100%" height="100%">
+  <defs>
+    <linearGradient id="pubgkr-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1A202C"/>
+      <stop offset="50%" stop-color="#111827"/>
+      <stop offset="100%" stop-color="#090D16"/>
+    </linearGradient>
+    <linearGradient id="kr-badge" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="100%" stop-color="#1D4ED8"/>
+    </linearGradient>
+  </defs>
+  <!-- Background Container -->
+  <rect width="128" height="128" rx="28" fill="url(#pubgkr-bg)"/>
+  <rect width="126" height="126" x="1" y="1" rx="27" fill="none" stroke="#3B82F6" stroke-width="2" stroke-opacity="0.4"/>
+  
+  <!-- Level 3 Helmet Silhouette -->
+  <g transform="translate(18, 14)">
+    <path d="M46 6 C28 6 14 18 10 34 C8 42 8 50 10 58 L12 66 L22 68 L24 74 L68 74 L70 68 L80 66 L82 58 C84 50 84 42 82 34 C78 18 64 6 46 6 Z" fill="#1E293B" stroke="#334155" stroke-width="2"/>
+    <path d="M16 38 L76 38 L78 54 L14 54 Z" fill="#0F172A" stroke="#3B82F6" stroke-width="2.5"/>
+    <rect x="22" y="44" width="48" height="4" rx="2" fill="#60A5FA"/>
+  </g>
+  
+  <!-- KR Ribbon / Tag -->
+  <g transform="translate(86, 12)">
+    <rect width="30" height="18" rx="5" fill="url(#kr-badge)"/>
+    <text x="15" y="13" font-family="-apple-system, sans-serif" font-weight="900" font-size="10" fill="#FFFFFF" text-anchor="middle" letter-spacing="1">KR</text>
+  </g>
+  
+  <!-- PUBG Text Banner -->
+  <g transform="translate(16, 94)">
+    <rect x="0" y="0" width="96" height="22" rx="6" fill="#3B82F6"/>
+    <text x="48" y="15" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Impact, Roboto, sans-serif" font-weight="900" font-size="12" fill="#FFFFFF" text-anchor="middle" letter-spacing="1.2">PUBG (KR/JP)</text>
+  </g>
+</svg>

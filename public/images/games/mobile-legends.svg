@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="100%" height="100%">
+  <defs>
+    <linearGradient id="ml-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E1B4B"/>
+      <stop offset="50%" stop-color="#0F172A"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+    <linearGradient id="ml-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDE047"/>
+      <stop offset="50%" stop-color="#EAB308"/>
+      <stop offset="100%" stop-color="#CA8A04"/>
+    </linearGradient>
+  </defs>
+  <!-- Background Container -->
+  <rect width="128" height="128" rx="28" fill="url(#ml-bg)"/>
+  <rect width="126" height="126" x="1" y="1" rx="27" fill="none" stroke="#EAB308" stroke-width="2" stroke-opacity="0.35"/>
+
+  <!-- Winged Sword & Crown Crest -->
+  <g transform="translate(24, 14)">
+    <!-- Crown / Wings Shape -->
+    <path d="M40 8 L54 28 L40 24 L26 28 Z" fill="url(#ml-gold)"/>
+    <path d="M40 18 L68 14 L56 42 L40 30 Z" fill="url(#ml-gold)" opacity="0.9"/>
+    <path d="M40 18 L12 14 L24 42 L40 30 Z" fill="url(#ml-gold)" opacity="0.9"/>
+    <!-- Central Broadsword -->
+    <path d="M38 24 L42 24 L43 62 L40 68 L37 62 Z" fill="#F8FAFC"/>
+    <rect x="33" y="44" width="14" height="4" rx="2" fill="url(#ml-gold)"/>
+    <circle cx="40" cy="72" r="3" fill="url(#ml-gold)"/>
+    <!-- Blue Gem Core -->
+    <polygon points="40,36 44,42 40,48 36,42" fill="#38BDF8"/>
+  </g>
+
+  <!-- MLBB Banner -->
+  <g transform="translate(14, 94)">
+    <rect x="0" y="0" width="100" height="22" rx="6" fill="url(#ml-gold)"/>
+    <text x="50" y="15" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Impact, Roboto, sans-serif" font-weight="900" font-size="12" fill="#0F172A" text-anchor="middle" letter-spacing="1.2">MOBILE LEGENDS</text>
+  </g>
+</svg>

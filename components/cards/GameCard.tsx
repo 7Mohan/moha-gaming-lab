@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { PERFORMANCE_AREA_LABELS, CATEGORY_LABELS } from "@/lib/games";
 import { ArrowRight } from "lucide-react";
+import { GameLogo } from "@/components/games/GameLogo";
 
 interface GameCardProps {
   game: Game;
@@ -54,18 +55,9 @@ export function GameCard({ game }: GameCardProps) {
       >
         {/* Top section */}
         <div className="flex flex-col gap-3">
-          {/* Game icon placeholder + title */}
+          {/* Game icon + title */}
           <div className="flex items-start gap-3">
-            {/* Icon placeholder — replaced when iconUrl is available */}
-            <div
-              className="w-10 h-10 rounded bg-bg-elevated border border-border-default flex items-center justify-center flex-shrink-0 text-accent"
-              aria-hidden="true"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d="M6 12h4m-2-2v4M15 12h.01M18 12h.01" strokeLinecap="round" />
-                <rect x="2" y="7" width="20" height="14" rx="3" />
-              </svg>
-            </div>
+            <GameLogo game={game} size="lg" priority />
 
             <div className="min-w-0 flex flex-col gap-0.5">
               <h3 className="text-sm font-semibold text-text-primary leading-snug">

@@ -24,7 +24,7 @@ const PROBLEM_FPS_DROP: CommonProblem = {
     "Use our FPS Calculator to understand your device's sustained ceiling",
   ],
   relatedToolSlugs: ["fps-calculator"],
-  relatedGuideSlugs: ["improve-fps-android"],
+  relatedGuideSlugs: ["diagnose-fps-drops-android", "understanding-frame-time"],
 };
 
 const PROBLEM_FRAME_PACING: CommonProblem = {
@@ -44,7 +44,7 @@ const PROBLEM_FRAME_PACING: CommonProblem = {
     "Check frame time with an overlay tool, not just the FPS counter",
   ],
   relatedToolSlugs: ["fps-calculator"],
-  relatedGuideSlugs: ["improve-fps-android"],
+  relatedGuideSlugs: ["understanding-frame-time"],
 };
 
 const PROBLEM_HIGH_PING: CommonProblem = {
@@ -66,7 +66,7 @@ const PROBLEM_HIGH_PING: CommonProblem = {
     "If using a VPN, try disabling it — VPNs often increase latency for gaming",
   ],
   relatedToolSlugs: ["ping-tester"],
-  relatedGuideSlugs: ["reduce-ping-mobile-games"],
+  relatedGuideSlugs: ["mobile-gaming-network-latency-jitter"],
 };
 
 const PROBLEM_TOUCH_DELAY: CommonProblem = {
@@ -86,7 +86,7 @@ const PROBLEM_TOUCH_DELAY: CommonProblem = {
     "Check if the game has 'Extreme Touch Response' or similar — enable if available",
     "Ensure the display is set to its maximum refresh rate (not power-saving mode)",
   ],
-  relatedGuideSlugs: ["improve-fps-android"],
+  relatedGuideSlugs: ["touch-latency-input-delay-guide"],
 };
 
 const PROBLEM_BATTERY_DRAIN: CommonProblem = {

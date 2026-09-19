@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="100%" height="100%">
+  <defs>
+    <linearGradient id="codm-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1C1917"/>
+      <stop offset="50%" stop-color="#0F0E0D"/>
+      <stop offset="100%" stop-color="#050505"/>
+    </linearGradient>
+    <linearGradient id="codm-amber" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FBBF24"/>
+      <stop offset="100%" stop-color="#D97706"/>
+    </linearGradient>
+  </defs>
+  <!-- Background Container -->
+  <rect width="128" height="128" rx="28" fill="url(#codm-bg)"/>
+  <rect width="126" height="126" x="1" y="1" rx="27" fill="none" stroke="#FBBF24" stroke-width="2" stroke-opacity="0.35"/>
+
+  <!-- Tactical Crosshair / Skull Emblem -->
+  <g transform="translate(24, 18)">
+    <!-- Outer Shield / Crosshair -->
+    <circle cx="40" cy="38" r="32" fill="none" stroke="#332D29" stroke-width="2"/>
+    <path d="M40 2 L40 14 M40 62 L40 74 M4 38 L16 38 M64 38 L76 38" stroke="#FBBF24" stroke-width="2.5" stroke-linecap="round"/>
+    
+    <!-- Ghost Skull / Tactical Mask -->
+    <path d="M26 26 C26 18 32 14 40 14 C48 14 54 18 54 26 C54 36 50 48 48 54 L32 54 C30 48 26 36 26 26 Z" fill="#292524" stroke="#44403C" stroke-width="1.5"/>
+    <!-- Eye Sockets -->
+    <path d="M30 28 L36 34 L32 36 Z" fill="#FBBF24"/>
+    <path d="M50 28 L44 34 L48 36 Z" fill="#FBBF24"/>
+    <!-- Teeth / Mask slots -->
+    <path d="M35 44 L35 50 M40 44 L40 50 M45 44 L45 50" stroke="#78716C" stroke-width="2" stroke-linecap="round"/>
+  </g>
+
+  <!-- COD:M Wordmark -->
+  <g transform="translate(14, 94)">
+    <rect x="0" y="0" width="100" height="22" rx="6" fill="#D97706"/>
+    <text x="50" y="15" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Impact, Roboto, sans-serif" font-weight="900" font-size="12" fill="#000000" text-anchor="middle" letter-spacing="1.2">CALL OF DUTY</text>
+  </g>
+</svg>

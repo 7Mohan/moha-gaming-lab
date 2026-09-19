@@ -27,6 +27,7 @@ import {
   Smartphone,
 } from "lucide-react";
 import type { PerformanceArea, OptimizationCategory } from "@/types/game";
+import { GameLogo } from "@/components/games/GameLogo";
 
 import { generateGameJsonLd, generateBreadcrumbsJsonLd } from "@/lib/seo/structured-data";
 
@@ -207,6 +208,8 @@ export default async function GameDetailPage({ params }: Props) {
           <div className="grid lg:grid-cols-3 gap-8 items-start">
             {/* Left: identity */}
             <div className="lg:col-span-2 flex flex-col gap-4">
+              {/* Game logo */}
+              <GameLogo game={game} size="xl" priority className="mb-1" />
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="label-mono">{CATEGORY_LABELS[game.category]}</span>
                 <Badge variant={tierVariant[game.deviceTier]} size="sm">

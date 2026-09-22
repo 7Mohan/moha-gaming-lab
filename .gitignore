@@ -50,3 +50,13 @@ ehthumbs.db
 /scratch/
 *.tmp
 *.bak
+
+# Security & Credentials — NEVER COMMIT SECRETS
+*.pem
+*.key
+*.token
+*.p12
+*.jks
+credentials*.json
+service-account*.json
+firebase-adminsdk*.json

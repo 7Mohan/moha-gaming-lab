@@ -19,8 +19,8 @@ dist
 .env.staging
 
 # Preserve example environment templates
-!.env.example
-!.env.production.example
+# .env files blocked
+# .env files blocked
 
 # Production logs & debug dumps
 npm-debug.log*
@@ -60,3 +60,7 @@ ehthumbs.db
 credentials*.json
 service-account*.json
 firebase-adminsdk*.json
+
+# Strict Environment Variable Lockout
+*.env*
+.env*
